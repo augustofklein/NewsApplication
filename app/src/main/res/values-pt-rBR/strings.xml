@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="historico">Histórico</string>
+    <string name="principal">Principal</string>
+    <string name="favoritos">Favoritos</string>
+</resources>

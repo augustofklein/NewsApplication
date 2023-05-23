@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">NewsApplication</string>
+    <string name="app_name" translatable="false">NewsApplication</string>
+
+    <string name="historico">History</string>
+    <string name="principal">Main</string>
+    <string name="favoritos">Bookmarks</string>
 </resources>
