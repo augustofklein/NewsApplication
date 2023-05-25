@@ -1,19 +1,43 @@
 package br.ucs.android.newsapplication.model;
 
-import java.util.Date;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class News {
-
-    private int id;
+    @SerializedName("source")
+    @Expose
+    private Source source;
+    @SerializedName("author")
+    @Expose
     private String author;
+    @SerializedName("title")
+    @Expose
     private String title;
-    private String source;
-    private String url;
-    private String urlToImage;
+    @SerializedName("description")
+    @Expose
     private String description;
+    @SerializedName("url")
+    @Expose
+    private String url;
+    @SerializedName("urlToImage")
+    @Expose
+    private String urlToImage;
+    @SerializedName("publishedAt")
+    @Expose
+    private String publishedAt;
+    @SerializedName("content")
+    @Expose
     private String content;
-    private Date publishedAt;
 
+    public Source getSource() {
+        return source;
+    }
+
+    public void setSource(Source source) {
+        this.source = source;
+    }
 
     public String getAuthor() {
         return author;
@@ -31,12 +55,12 @@ public class News {
         this.title = title;
     }
 
-    public String getSource() {
-        return source;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSource(String source) {
-        this.source = source;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getUrl() {
@@ -55,12 +79,12 @@ public class News {
         this.urlToImage = urlToImage;
     }
 
-    public String getDescription() {
-        return description;
+    public String getPublishedAt() {
+        return publishedAt;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setPublishedAt(String publishedAt) {
+        this.publishedAt = publishedAt;
     }
 
     public String getContent() {
@@ -70,24 +94,5 @@ public class News {
     public void setContent(String content) {
         this.content = content;
     }
-
-    public Date getPublishedAt() {
-        return publishedAt;
-    }
-
-    public void setPublishedAt(Date publishedAt) {
-        this.publishedAt = publishedAt;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public News() {    }
-
 
 }
