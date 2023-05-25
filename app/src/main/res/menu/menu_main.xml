@@ -1,10 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
+
         <item
-            android:id="@+id/nav_historico"
-            android:icon="@drawable/ic_menu_historico"
-            android:title="@string/historico" />
+            android:id="@+id/nav_buscar"
+            android:icon="@drawable/ic_menu_buscar"
+            android:title="@string/buscar" />
         <item
             android:id="@+id/nav_principal"
             android:icon="@drawable/ic_menu_principal"
@@ -13,6 +14,10 @@
             android:id="@+id/nav_favoritos"
             android:icon="@drawable/ic_menu_favoritos"
             android:title="@string/favoritos" />
+        <item
+            android:id="@+id/nav_historico"
+            android:icon="@drawable/ic_menu_historico"
+            android:title="@string/historico" />
     </group>
 
 

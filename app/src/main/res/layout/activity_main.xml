@@ -6,30 +6,34 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
+    <ScrollView
+        android:id="@+id/svMain"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#E2E3E4"
-        app:itemIconSize="36dp"
-        app:labelVisibilityMode="auto"
+        app:layout_constraintBottom_toTopOf="@id/bnvMenu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fcvMain"
+            android:name="br.ucs.android.newsapplication.FavoritosFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </ScrollView>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bnvMenu"
+        style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:itemIconSize="24dp"
+        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/menu_main">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right|end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="32dp"
-            android:clickable="true"
-            android:visibility="visible"
-            app:srcCompat="?android:attr/actionModeWebSearchDrawable"
-            tools:visibility="visible" />
-    </com.google.android.material.bottomnavigation.BottomNavigationView>
+        app:layout_constraintTop_toBottomOf="@id/svMain"
+        app:menu="@menu/menu_main" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,4 +3,5 @@
     <string name="historico">Histórico</string>
     <string name="principal">Principal</string>
     <string name="favoritos">Favoritos</string>
+    <string name="buscar">Buscar</string>
 </resources>
