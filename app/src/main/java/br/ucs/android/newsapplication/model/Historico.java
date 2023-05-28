@@ -11,16 +11,8 @@ public class Historico {
 
     private Date data;
 
-    private ArrayList<News> resultados;
+    private ArrayList<Artigo> resultados;
 
-    public Historico() { }
-
-    public Historico(int id, String termo, Date data, ArrayList<News> resultados) {
-        this.id = id;
-        this.termo = termo;
-        this.data = data;
-        this.resultados = resultados;
-    }
 
     public int getId() {
         return id;
@@ -46,11 +38,11 @@ public class Historico {
         this.data = data;
     }
 
-    public ArrayList<News> getResultados() {
+    public ArrayList<Artigo> getResultados() {
         return resultados;
     }
 
-    public void setResultados(ArrayList<News> resultados) {
+    public void setResultados(ArrayList<Artigo> resultados) {
         this.resultados = resultados;
     }
 

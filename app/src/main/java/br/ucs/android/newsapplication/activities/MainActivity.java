@@ -2,22 +2,24 @@ package br.ucs.android.newsapplication.activities;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.ucs.android.newsapplication.BuscarFragment;
+import br.ucs.android.newsapplication.FavoritosFragment;
 import br.ucs.android.newsapplication.R;
-import br.ucs.android.newsapplication.adapter.NewsAdapter;
-import br.ucs.android.newsapplication.model.News;
+import br.ucs.android.newsapplication.database.BDSQLiteHelper;
+import br.ucs.android.newsapplication.model.Artigo;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
 import retrofit2.Call;
@@ -31,14 +33,52 @@ public class MainActivity extends AppCompatActivity {
     // Aqui vai a chave da API
     private final static String API_KEY = "16613c31e3b54b27bf64db1ba67bfe95";
 
+    public BottomNavigationView bnvMenu;
+    public FragmentManager fragmentManager;
+
+    private BDSQLiteHelper bd;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        bd = new BDSQLiteHelper(this);
+
+        bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
+        fragmentManager = getSupportFragmentManager();
+
+        bnvMenu.setOnItemSelectedListener(item -> {
+
+            switch(item.getItemId()) {
+
+                case R.id.nav_historico -> {
+                    return true;
+                }
+                case R.id.nav_favoritos -> fragmentManager.beginTransaction()
+                        .replace(R.id.fcvMain, FavoritosFragment.class, null)
+                        .setReorderingAllowed(true)
+                        .addToBackStack("favoritos") // name can be null
+                        .commit();
+                case R.id.nav_principal -> {
+                    return false;
+                }
+                case R.id.nav_buscar -> fragmentManager.beginTransaction()
+                        .replace(R.id.fcvMain, BuscarFragment.class, null)
+                        .setReorderingAllowed(true)
+                        .addToBackStack("buscar") // name can be null
+                        .commit();
+            }
+            return true;
+        });
+
+
+
+        /*
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date data = new Date();
         String dataFormatada = dateFormat.format(data);
-
-        super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
 
         if (API_KEY.isEmpty()) {
             Toast.makeText(getApplicationContext(), "É necessário obter a chave da API https://newsapi.org/!", Toast.LENGTH_LONG).show();
@@ -46,39 +86,37 @@ public class MainActivity extends AppCompatActivity {
         }
 
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-        Call<News> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+        Call<Artigo> call = apiService.getTopHeadLines("BR", "business", API_KEY);
 
-        //Call<News> call = apiService.getSearchByUser("tesla", dataFormatada, API_KEY);
+        //Call<Artigo> call = apiService.getSearchByUser("tesla", dataFormatada, API_KEY);
 
-        call.enqueue(new Callback<News>() {
+        call.enqueue(new Callback<Artigo>() {
             @Override
-            public void onResponse(Call<News> call, Response<News> response) {
+            public void onResponse(Call<Artigo> call, Response<Artigo> response) {
                 int statusCode = response.code();
-                //List<News> movies = response.body().getResults();
+                //List<Artigo> movies = response.body().getResults();
                 //recyclerView.setAdapter(new NewsAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
             }
 
             @Override
-            public void onFailure(Call<News> call, Throwable t) {
+            public void onFailure(Call<Artigo> call, Throwable t) {
                 mostraAlerta("Erro", t.toString());
                 // Log error here since request failed
                 Log.e(TAG, t.toString());
             }
         });
+        */
+
     }
+
 
     private void mostraAlerta(String titulo, String mensagem) {
         AlertDialog alertDialog = new
                 AlertDialog.Builder(MainActivity.this).create();
         alertDialog.setTitle(titulo);
         alertDialog.setMessage(mensagem);
-        alertDialog.setButton(AlertDialog. BUTTON_NEUTRAL ,
-                getString(R.string.ok),
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
+                (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 }

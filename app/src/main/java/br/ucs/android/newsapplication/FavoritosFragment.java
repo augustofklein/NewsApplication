@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.placeholder.PlaceholderContent;
 
 /**
@@ -34,6 +35,7 @@ public class FavoritosFragment extends Fragment {
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static FavoritosFragment newInstance(int columnCount) {
+
         FavoritosFragment fragment = new FavoritosFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
@@ -48,11 +50,15 @@ public class FavoritosFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+
         View view = inflater.inflate(R.layout.fragment_item_list, container, false);
 
         // Set the adapter

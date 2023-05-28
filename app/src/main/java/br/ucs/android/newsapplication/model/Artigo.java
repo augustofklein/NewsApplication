@@ -3,9 +3,10 @@ package br.ucs.android.newsapplication.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+public class Artigo {
 
-public class News {
+    private int id;
+    private int idSource;
     @SerializedName("source")
     @Expose
     private Source source;
@@ -30,6 +31,22 @@ public class News {
     @SerializedName("content")
     @Expose
     private String content;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getIdSource() {
+        return idSource;
+    }
+
+    public void setIdSource(int idSource) {
+        this.idSource = idSource;
+    }
 
     public Source getSource() {
         return source;

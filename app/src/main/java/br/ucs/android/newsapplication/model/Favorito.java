@@ -5,7 +5,8 @@ import java.util.Date;
 public class Favorito {
 
     private int id;
-    private News news;
+    private int idArtigo;
+    private Artigo artigo;
     private Date data;
     private String observacao;
 
@@ -17,12 +18,20 @@ public class Favorito {
         this.id = id;
     }
 
-    public News getNews() {
-        return news;
+    public int getIdArtigo() {
+        return idArtigo;
     }
 
-    public void setNews(News news) {
-        this.news = news;
+    public void setIdArtigo(int idArtigo) {
+        this.idArtigo = idArtigo;
+    }
+
+    public Artigo getArtigo() {
+        return artigo;
+    }
+
+    public void setArtigo(Artigo artigo) {
+        this.artigo = artigo;
     }
 
     public Date getData() {
@@ -41,12 +50,4 @@ public class Favorito {
         this.observacao = observacao;
     }
 
-    public Favorito() { }
-
-    public Favorito(int id, News news, Date criadoEm, String observacao) {
-        this.id = id;
-        this.news = news;
-        this.data = criadoEm;
-        this.observacao = observacao;
-    }
 }

@@ -26,9 +26,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_14
         targetCompatibility JavaVersion.VERSION_14
     }
+
     buildFeatures {
         viewBinding true
     }
+
+    namespace 'br.ucs.android.newsapplication'
 }
 
 dependencies {
