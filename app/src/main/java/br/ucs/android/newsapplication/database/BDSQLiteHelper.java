@@ -16,7 +16,7 @@ import br.ucs.android.newsapplication.model.Source;
 public class BDSQLiteHelper extends SQLiteOpenHelper
 {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "NewsAppDB2";
+    private static final String DATABASE_NAME = "NewsAppDB";
 
     private static final String TABELA_SOURCE = "source";
     private static final String TABELA_ARTIGO = "artigo";
@@ -84,7 +84,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 ARTIGO_URL + " TEXT, " +
                 ARTIGO_URLTOIMAGE + " TEXT, " +
                 ARTIGO_PUBLISHEDAT + " TEXT, " +
-                ARTIGO_CONTENT + "TEXT, "+
+                ARTIGO_CONTENT + " TEXT, "+
                 "FOREIGN KEY ( " + ARTIGO_SOURCE + " )" +
                 "REFERENCES " + TABELA_SOURCE + " ( " + ID + " ) " +
                 "ON DELETE CASCADE " +

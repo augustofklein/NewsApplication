@@ -11,4 +11,4 @@
     android:background="@color/purple_200"
     app:layoutManager="LinearLayoutManager"
     tools:context=".FavoritosFragment"
-    tools:listitem="@layout/fragment_item" />
+    tools:listitem="@layout/item_favoritos" />

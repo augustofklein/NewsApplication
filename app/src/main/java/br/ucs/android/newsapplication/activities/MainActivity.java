@@ -1,5 +1,6 @@
 package br.ucs.android.newsapplication.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
@@ -7,9 +8,11 @@ import androidx.fragment.app.FragmentManager;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -17,9 +20,11 @@ import java.util.List;
 
 import br.ucs.android.newsapplication.BuscarFragment;
 import br.ucs.android.newsapplication.FavoritosFragment;
+import br.ucs.android.newsapplication.HistoricoFragment;
 import br.ucs.android.newsapplication.R;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
+import br.ucs.android.newsapplication.model.Source;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
 import retrofit2.Call;
@@ -45,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
 
         bd = new BDSQLiteHelper(this);
 
+        //Source source = bd.getSource(1);
+
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
@@ -53,21 +60,32 @@ public class MainActivity extends AppCompatActivity {
             switch(item.getItemId()) {
 
                 case R.id.nav_historico -> {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fcvMain, HistoricoFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("historico") // name can be null
+                            .commit();
                     return true;
                 }
-                case R.id.nav_favoritos -> fragmentManager.beginTransaction()
-                        .replace(R.id.fcvMain, FavoritosFragment.class, null)
-                        .setReorderingAllowed(true)
-                        .addToBackStack("favoritos") // name can be null
-                        .commit();
+                case R.id.nav_favoritos -> {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fcvMain, FavoritosFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("favoritos") // name can be null
+                            .commit();
+                    return true;
+                }
                 case R.id.nav_principal -> {
                     return false;
                 }
-                case R.id.nav_buscar -> fragmentManager.beginTransaction()
-                        .replace(R.id.fcvMain, BuscarFragment.class, null)
-                        .setReorderingAllowed(true)
-                        .addToBackStack("buscar") // name can be null
-                        .commit();
+                case R.id.nav_buscar -> {
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fcvMain, BuscarFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .addToBackStack("buscar") // name can be null
+                            .commit();
+                    return true;
+                }
             }
             return true;
         });
