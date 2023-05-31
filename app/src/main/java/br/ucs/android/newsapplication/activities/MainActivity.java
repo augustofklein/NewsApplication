@@ -1,15 +1,24 @@
 package br.ucs.android.newsapplication.activities;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,6 +29,7 @@ import br.ucs.android.newsapplication.FavoritosFragment;
 import br.ucs.android.newsapplication.R;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
+import br.ucs.android.newsapplication.model.Source;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
 import retrofit2.Call;
@@ -48,30 +58,42 @@ public class MainActivity extends AppCompatActivity {
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
-        bnvMenu.setOnItemSelectedListener(item -> {
+        bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
 
-            switch(item.getItemId()) {
+                    case R.id.nav_historico:
+                        verifica_disponibilidade_aplicacao();
+                        break;
 
-                case R.id.nav_historico -> {
-                    return true;
+                    case R.id.nav_favoritos:
+                        verifica_disponibilidade_aplicacao();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.fcvMain, FavoritosFragment.class, null)
+                                .setReorderingAllowed(true)
+                                .addToBackStack("favoritos") // name can be null
+                                .commit();
+                        break;
+
+                    case R.id.nav_principal:
+                        verifica_disponibilidade_aplicacao();
+                        break;
+
+                    case R.id.nav_buscar:
+                        verifica_disponibilidade_aplicacao();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.fcvMain, BuscarFragment.class, null)
+                                .setReorderingAllowed(true)
+                                .addToBackStack("buscar") // name can be null
+                                .commit();
+                        break;
+
                 }
-                case R.id.nav_favoritos -> fragmentManager.beginTransaction()
-                        .replace(R.id.fcvMain, FavoritosFragment.class, null)
-                        .setReorderingAllowed(true)
-                        .addToBackStack("favoritos") // name can be null
-                        .commit();
-                case R.id.nav_principal -> {
-                    return false;
-                }
-                case R.id.nav_buscar -> fragmentManager.beginTransaction()
-                        .replace(R.id.fcvMain, BuscarFragment.class, null)
-                        .setReorderingAllowed(true)
-                        .addToBackStack("buscar") // name can be null
-                        .commit();
+
+                return false;
             }
-            return true;
         });
-
 
 
         /*
@@ -118,5 +140,21 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),
                 (dialog, which) -> dialog.dismiss());
         alertDialog.show();
+    }
+
+    public void verifica_disponibilidade_aplicacao(){
+        if (!verifica_conexao_mobile()){
+            View view = getWindow().getDecorView().findViewById(android.R.id.content);
+            Snackbar.make(view, "Sem internet, aplicação em modo offline! ", Snackbar.LENGTH_LONG).show();
+        }
+    }
+
+    public boolean verifica_conexao_mobile() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected() &&
+                (activeNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE ||
+                        activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI);
     }
 }
