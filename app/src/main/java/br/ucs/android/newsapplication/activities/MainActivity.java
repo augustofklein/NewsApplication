@@ -58,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
+        verifica_disponibilidade_aplicacao();
+
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
