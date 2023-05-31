@@ -17,7 +17,7 @@ import br.ucs.android.newsapplication.placeholder.PlaceholderContent;
 /**
  * A fragment representing a list of Items.
  */
-public class FavoritosFragment extends Fragment {
+public class HistoricoFragment extends Fragment {
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -28,14 +28,13 @@ public class FavoritosFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FavoritosFragment() {
+    public HistoricoFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static FavoritosFragment newInstance(int columnCount) {
-
-        FavoritosFragment fragment = new FavoritosFragment();
+    public static HistoricoFragment newInstance(int columnCount) {
+        HistoricoFragment fragment = new HistoricoFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -49,16 +48,12 @@ public class FavoritosFragment extends Fragment {
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-
-
-        View view = inflater.inflate(R.layout.fragment_favoritos, container, false);
+        View view = inflater.inflate(R.layout.fragment_historico, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -69,7 +64,7 @@ public class FavoritosFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new FavoritosRecyclerViewAdapter(PlaceholderContent.ITEMS));
+            recyclerView.setAdapter(new ItemHistoricoRecyclerViewAdapter(PlaceholderContent.ITEMS));
         }
         return view;
     }
