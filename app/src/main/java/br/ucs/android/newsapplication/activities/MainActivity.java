@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,8 +29,10 @@ import java.util.List;
 import br.ucs.android.newsapplication.BuscarFragment;
 import br.ucs.android.newsapplication.FavoritosFragment;
 import br.ucs.android.newsapplication.R;
+import br.ucs.android.newsapplication.adapter.NewsAdapter;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
+import br.ucs.android.newsapplication.model.NewsResponse;
 import br.ucs.android.newsapplication.model.Source;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
         verifica_disponibilidade_aplicacao();
 
+        /*
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -96,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+        */
 
 
-        /*
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date data = new Date();
@@ -109,30 +114,29 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        // REVISAR PARA COLOCAR O ID DA TELA
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-        Call<Artigo> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+        Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
 
-        //Call<Artigo> call = apiService.getSearchByUser("tesla", dataFormatada, API_KEY);
-
-        call.enqueue(new Callback<Artigo>() {
+        call.enqueue(new Callback<NewsResponse>() {
             @Override
-            public void onResponse(Call<Artigo> call, Response<Artigo> response) {
+            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
                 int statusCode = response.code();
-                //List<Artigo> movies = response.body().getResults();
-                //recyclerView.setAdapter(new NewsAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
+                List<Artigo> artigos = response.body().getResults();
+                recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
             }
 
             @Override
-            public void onFailure(Call<Artigo> call, Throwable t) {
+            public void onFailure(Call<NewsResponse> call, Throwable t) {
                 mostraAlerta("Erro", t.toString());
                 // Log error here since request failed
                 Log.e(TAG, t.toString());
             }
         });
-        */
-
     }
-
 
     private void mostraAlerta(String titulo, String mensagem) {
         AlertDialog alertDialog = new

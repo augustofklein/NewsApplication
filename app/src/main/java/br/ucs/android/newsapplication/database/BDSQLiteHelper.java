@@ -224,7 +224,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     }
     private Source cursorToSource(Cursor cursor) {
         Source source = new Source();
-        source.setId(Integer.parseInt(cursor.getString(0)));
+        source.setId(cursor.getString(0));
         source.setSource_id(cursor.getString(1));
         source.setSource_name(cursor.getString(2));
         return source;
