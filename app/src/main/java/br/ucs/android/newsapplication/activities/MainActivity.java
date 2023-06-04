@@ -106,14 +106,35 @@ public class MainActivity extends AppCompatActivity {
 
     private void atualiza_headlines_bd_local(){
 
+        if(verifica_conexao_mobile()){
+            bd.deletaTodasHeadLines();
+            grava_headlines_bd_local();
+        }
     }
 
-    private void atualiza_historico_bd_local(){
+    private void grava_headlines_bd_local(){
+        Call<NewsResponse> call;
 
-    }
+        call = retorna_dados_endpoint_headlines();
 
-    private void atualiza_favoritos_bd_local(){
+        call.enqueue(new Callback<NewsResponse>() {
+            @Override
+            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
+                int statusCode = response.code();
+                List<Artigo> artigos = response.body().getResults();
 
+                for(int i = 0; i<artigos.size(); i++){
+                    bd.addArtigo(artigos.get(i), 3);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NewsResponse> call, Throwable t) {
+                mostraAlerta("Erro", t.toString());
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
     }
 
     public void processa_carregamento_headlines(){
