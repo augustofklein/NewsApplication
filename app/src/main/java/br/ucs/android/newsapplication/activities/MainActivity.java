@@ -64,12 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
         verifica_disponibilidade_aplicacao();
 
-        /*
+        processa_carregamento_headlines();
+
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-
                     case R.id.nav_historico:
                         verifica_disponibilidade_aplicacao();
                         break;
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_favoritos:
                         verifica_disponibilidade_aplicacao();
                         fragmentManager.beginTransaction()
-                                .replace(R.id.fcvMain, FavoritosFragment.class, null)
+                                .replace(R.id.articles_recycler_view, FavoritosFragment.class, null)
                                 .setReorderingAllowed(true)
                                 .addToBackStack("favoritos") // name can be null
                                 .commit();
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_buscar:
                         verifica_disponibilidade_aplicacao();
                         fragmentManager.beginTransaction()
-                                .replace(R.id.fcvMain, BuscarFragment.class, null)
+                                .replace(R.id.articles_recycler_view, BuscarFragment.class, null)
                                 .setReorderingAllowed(true)
                                 .addToBackStack("buscar") // name can be null
                                 .commit();
@@ -101,26 +101,35 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-        */
+    }
 
+    public void processa_carregamento_headlines(){
 
+        if(verifica_conexao_mobile()){
+            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+            Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
 
+            processa_carregamento_dados(call);
+        } else {
+            // CARREGAMENTO DO BANCO LOCAL
+        }
+
+    }
+
+    public void processa_carregamento_search(String pesquisa){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date data = new Date();
         String dataFormatada = dateFormat.format(data);
 
-        if (API_KEY.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "É necessário obter a chave da API https://newsapi.org/!", Toast.LENGTH_LONG).show();
-            return;
-        }
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
 
-        // REVISAR PARA COLOCAR O ID DA TELA
+        processa_carregamento_dados(call);
+    }
+
+    public void processa_carregamento_dados(Call<NewsResponse> call){
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-        Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
-
         call.enqueue(new Callback<NewsResponse>() {
             @Override
             public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
