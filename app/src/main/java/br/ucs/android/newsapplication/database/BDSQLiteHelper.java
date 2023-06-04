@@ -19,6 +19,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "NewsAppDB";
     private static final String TABELA_SOURCE = "source";
     private static final String TABELA_ARTIGO = "artigo";
+    private static final String TABELA_HEADLINES = "headline";
     private static final String TABELA_FAVORITOS = "favorito";
     private static final String TABELA_HISTORICO = "historico";
     private static final String TABELA_HISTORICO_ARTIGO = "historico_artigo";
@@ -36,6 +37,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String ARTIGO_CONTENT = "content";
     private static final String[] COLUNAS_ARTIGO = {ID, ARTIGO_SOURCE, ARTIGO_AUTHOR, ARTIGO_TITLE,
             ARTIGO_DESCRIPTION, ARTIGO_URL, ARTIGO_URLTOIMAGE, ARTIGO_PUBLISHEDAT, ARTIGO_CONTENT};
+    private static final String HEADLINE_ARTIGO = "idHeadline";
     private static final String FAVORITOS_ARTIGO = "idArtigo";
     private static final String FAVORITOS_DATA = "data";
     private static final String FAVORITOS_OBSERVACAO = "observacao";
@@ -75,6 +77,15 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 "REFERENCES " + TABELA_SOURCE + " ( " + ID + " ) " +
                 "ON DELETE CASCADE " +
                 "ON UPDATE NO ACTION)";
+        db.execSQL(CREATE_TABLE);
+
+        CREATE_TABLE = "CREATE TABLE " + TABELA_HEADLINES + " ( " +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                HEADLINE_ARTIGO + " INTEGER, " +
+                "FOREIGN KEY ( " + HEADLINE_ARTIGO + " ) " +
+                "REFERENCES " + TABELA_ARTIGO + " ( " + ID + " )" +
+                "ON DELETE CASCADE " +
+                "ON UPDATE NO ACTION) ";
         db.execSQL(CREATE_TABLE);
 
         CREATE_TABLE = "CREATE TABLE " + TABELA_FAVORITOS + " ( " +
