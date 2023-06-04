@@ -52,8 +52,9 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
     private static final String HISTORICO_DATA = "data";
     private static final String HISTORICO_TERMO = "termo";
+    private static final String HISTORICO_RESULTADOS = "resultados";
 
-    private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO};
+    private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO, HISTORICO_RESULTADOS};
 
     private static final String HISTORICO_ARTIGO_ARTIGO = "idArtigo";
     private static final String HISTORICO_ARTIGO_HISTORICO = "idHistorico";
@@ -105,7 +106,8 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HISTORICO_DATA + " TEXT, " +
-                HISTORICO_TERMO + " TEXT ) ";
+                HISTORICO_TERMO + " TEXT, " +
+                HISTORICO_RESULTADOS + " INTEGER ) ";
         db.execSQL(CREATE_TABLE);
 
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO_ARTIGO + " ( " +
@@ -131,7 +133,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         this.onCreate(db);
     }
 
-    public void addArtigo(Artigo article) {
+    public long addArtigo(Artigo article) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(ARTIGO_SOURCE, article.getSource().getId());
@@ -142,14 +144,19 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         values.put(ARTIGO_URLTOIMAGE, article.getUrlToImage());
         values.put(ARTIGO_PUBLISHEDAT, article.getPublishedAt());
         values.put(ARTIGO_CONTENT, article.getContent());
-        db.insert(TABELA_ARTIGO, null, values);
+        long id = db.insert(TABELA_ARTIGO, null, values);
         db.close();
+        return id;
     }
 
     public void addFavorito(Favorito favorito) {
+
+        if(favorito.getIdArtigo() == 0)
+            favorito.setIdArtigo((int) addArtigo(favorito.getArtigo()));
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(FAVORITOS_ARTIGO, favorito.getArtigo().getId());
+        values.put(FAVORITOS_ARTIGO, favorito.getIdArtigo());
         values.put(FAVORITOS_DATA, favorito.getData().toLocaleString());
         values.put(FAVORITOS_OBSERVACAO, favorito.getObservacao());
         db.insert(TABELA_FAVORITOS, null, values);
@@ -160,7 +167,23 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put(HISTORICO_DATA, historico.getData().toLocaleString());
         values.put(HISTORICO_TERMO, historico.getTermo());
-        db.insert(TABELA_HISTORICO, null, values);
+        values.put(HISTORICO_RESULTADOS, historico.getResultados().size());
+        historico.setId((int) db.insert(TABELA_HISTORICO, null, values));
+        db.close();
+
+        for (var artigo : historico.getResultados()) {
+            artigo.setId((int) addArtigo(artigo));
+            addArtigoHistorico(artigo.getId(), historico.getId());
+        }
+    }
+
+    private void addArtigoHistorico(int idArtigo, int idHistorico)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(HISTORICO_ARTIGO_ARTIGO, idArtigo);
+        values.put(HISTORICO_ARTIGO_HISTORICO, idHistorico);
+        db.insert(TABELA_HISTORICO_ARTIGO, null, values);
         db.close();
     }
 

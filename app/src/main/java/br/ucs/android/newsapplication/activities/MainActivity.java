@@ -1,5 +1,6 @@
 package br.ucs.android.newsapplication.activities;
 
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,9 +27,11 @@ import java.util.List;
 
 import br.ucs.android.newsapplication.BuscarFragment;
 import br.ucs.android.newsapplication.FavoritosFragment;
+import br.ucs.android.newsapplication.HistoricoFragment;
 import br.ucs.android.newsapplication.R;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
+import br.ucs.android.newsapplication.model.Favorito;
 import br.ucs.android.newsapplication.model.Source;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
@@ -55,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
         bd = new BDSQLiteHelper(this);
 
+        populaBanco();
+
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
@@ -67,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
 
                     case R.id.nav_historico:
                         verifica_disponibilidade_aplicacao();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.fcvMain, HistoricoFragment.class, null)
+                                .setReorderingAllowed(true)
+                                .addToBackStack("historico") // name can be null
+                                .commit();
                         break;
 
                     case R.id.nav_favoritos:
@@ -96,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
 
 
         /*
@@ -133,6 +144,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void populaBanco()
+    {
+        Artigo artigo = new Artigo();
+
+        Source source = new Source();
+        source.setSource_id("techcrunch");
+        source.setSource_name("TechCrunch");
+        artigo.setSource(new Source());
+
+        artigo.setSource(source);
+        artigo.setAuthor("Taylor Hatmaker");
+        artigo.setTitle("YouTube rolls back its rules against election misinformation");
+        artigo.setDescription("YouTube reverses its rules against some election misinformation, allowing some previously prohibited content around U.S. elections.");
+        artigo.setContent("YouTube was the slowest major platform to disallow misinformation during the 2020 U.S. election and almost three years later, the company will toss that policy out altogether.\\r\\nThe company announced … [+1993 chars]");
+        artigo.setUrl("\"https://techcrunch.com/2023/06/03/youtube-rolls-back-its-rules-against-election-misinformation/");
+        artigo.setUrlToImage("\"https://techcrunch.com/wp-content/uploads/2022/04/youtube-ios-app.webp?resize=1200,674");
+        artigo.setPublishedAt("2023-06-03T22:57:34Z");
+
+        long id = bd.addArtigo(artigo);
+
+        Favorito favorito = new Favorito();
+        favorito.setData(new Date());
+        favorito.setObservacao("Bem legal essa notícia!");
+        favorito.setArtigo(artigo);
+        favorito.setIdArtigo((int) id);
+
+        bd.addFavorito(favorito);
+    }
 
     private void mostraAlerta(String titulo, String mensagem) {
         AlertDialog alertDialog = new
