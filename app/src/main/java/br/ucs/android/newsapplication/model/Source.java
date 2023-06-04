@@ -5,7 +5,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class Source {
 
-    private int id;
     @SerializedName("id")
     @Expose
     private String source_id;
@@ -13,12 +12,12 @@ public class Source {
     @Expose
     private String source_name;
 
-    public int getId() {
-        return id;
+    public String getId() {
+        return source_id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(String id) {
+        this.source_id = id;
     }
 
     public String getSource_id() {

@@ -1,10 +1,11 @@
 package br.ucs.android.newsapplication.activities;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,11 +28,11 @@ import java.util.List;
 
 import br.ucs.android.newsapplication.BuscarFragment;
 import br.ucs.android.newsapplication.FavoritosFragment;
-import br.ucs.android.newsapplication.HistoricoFragment;
 import br.ucs.android.newsapplication.R;
+import br.ucs.android.newsapplication.adapter.NewsAdapter;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
-import br.ucs.android.newsapplication.model.Favorito;
+import br.ucs.android.newsapplication.model.NewsResponse;
 import br.ucs.android.newsapplication.model.Source;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
@@ -42,13 +43,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    // Aqui vai a chave da API
     private final static String API_KEY = "16613c31e3b54b27bf64db1ba67bfe95";
-
     public BottomNavigationView bnvMenu;
     public FragmentManager fragmentManager;
-
     private BDSQLiteHelper bd;
 
     @Override
@@ -56,33 +53,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bd = new BDSQLiteHelper(this);
-
-        populaBanco();
+        inicializa_bd_local();
+        atualiza_headlines_bd_local();
+        verifica_disponibilidade_aplicacao();
+        processa_carregamento_headlines();
 
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
-        verifica_disponibilidade_aplicacao();
-
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
 
+                switch (item.getItemId()) {
                     case R.id.nav_historico:
                         verifica_disponibilidade_aplicacao();
-                        fragmentManager.beginTransaction()
-                                .replace(R.id.fcvMain, HistoricoFragment.class, null)
-                                .setReorderingAllowed(true)
-                                .addToBackStack("historico") // name can be null
-                                .commit();
                         break;
 
                     case R.id.nav_favoritos:
                         verifica_disponibilidade_aplicacao();
                         fragmentManager.beginTransaction()
-                                .replace(R.id.fcvMain, FavoritosFragment.class, null)
+                                .replace(R.id.articles_recycler_view, FavoritosFragment.class, null)
                                 .setReorderingAllowed(true)
                                 .addToBackStack("favoritos") // name can be null
                                 .commit();
@@ -95,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_buscar:
                         verifica_disponibilidade_aplicacao();
                         fragmentManager.beginTransaction()
-                                .replace(R.id.fcvMain, BuscarFragment.class, null)
+                                .replace(R.id.articles_recycler_view, BuscarFragment.class, null)
                                 .setReorderingAllowed(true)
                                 .addToBackStack("buscar") // name can be null
                                 .commit();
@@ -106,71 +97,66 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
 
+    private void inicializa_bd_local(){
+        bd = new BDSQLiteHelper(this);
+    }
 
+    private void atualiza_headlines_bd_local(){
 
-        /*
+    }
 
+    private void atualiza_historico_bd_local(){
+
+    }
+
+    private void atualiza_favoritos_bd_local(){
+
+    }
+
+    public void processa_carregamento_headlines(){
+
+        if(verifica_conexao_mobile()){
+            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+            Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+
+            processa_carregamento_dados(call);
+        } else {
+            // CARREGAMENTO DO BANCO LOCAL
+        }
+
+    }
+
+    public void processa_carregamento_search(String pesquisa){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date data = new Date();
         String dataFormatada = dateFormat.format(data);
 
-        if (API_KEY.isEmpty()) {
-            Toast.makeText(getApplicationContext(), "É necessário obter a chave da API https://newsapi.org/!", Toast.LENGTH_LONG).show();
-            return;
-        }
-
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-        Call<Artigo> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+        Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
 
-        //Call<Artigo> call = apiService.getSearchByUser("tesla", dataFormatada, API_KEY);
+        processa_carregamento_dados(call);
+    }
 
-        call.enqueue(new Callback<Artigo>() {
+    public void processa_carregamento_dados(Call<NewsResponse> call){
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        call.enqueue(new Callback<NewsResponse>() {
             @Override
-            public void onResponse(Call<Artigo> call, Response<Artigo> response) {
+            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
                 int statusCode = response.code();
-                //List<Artigo> movies = response.body().getResults();
-                //recyclerView.setAdapter(new NewsAdapter(movies, R.layout.list_item_movie, getApplicationContext()));
+                List<Artigo> artigos = response.body().getResults();
+                recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
             }
 
             @Override
-            public void onFailure(Call<Artigo> call, Throwable t) {
+            public void onFailure(Call<NewsResponse> call, Throwable t) {
                 mostraAlerta("Erro", t.toString());
                 // Log error here since request failed
                 Log.e(TAG, t.toString());
             }
         });
-        */
-
-    }
-
-    public void populaBanco()
-    {
-        Artigo artigo = new Artigo();
-
-        Source source = new Source();
-        source.setSource_id("techcrunch");
-        source.setSource_name("TechCrunch");
-        artigo.setSource(new Source());
-
-        artigo.setSource(source);
-        artigo.setAuthor("Taylor Hatmaker");
-        artigo.setTitle("YouTube rolls back its rules against election misinformation");
-        artigo.setDescription("YouTube reverses its rules against some election misinformation, allowing some previously prohibited content around U.S. elections.");
-        artigo.setContent("YouTube was the slowest major platform to disallow misinformation during the 2020 U.S. election and almost three years later, the company will toss that policy out altogether.\\r\\nThe company announced … [+1993 chars]");
-        artigo.setUrl("\"https://techcrunch.com/2023/06/03/youtube-rolls-back-its-rules-against-election-misinformation/");
-        artigo.setUrlToImage("\"https://techcrunch.com/wp-content/uploads/2022/04/youtube-ios-app.webp?resize=1200,674");
-        artigo.setPublishedAt("2023-06-03T22:57:34Z");
-
-        long id = bd.addArtigo(artigo);
-
-        Favorito favorito = new Favorito();
-        favorito.setData(new Date());
-        favorito.setObservacao("Bem legal essa notícia!");
-        favorito.setArtigo(artigo);
-        favorito.setIdArtigo((int) id);
-
-        bd.addFavorito(favorito);
     }
 
     private void mostraAlerta(String titulo, String mensagem) {
