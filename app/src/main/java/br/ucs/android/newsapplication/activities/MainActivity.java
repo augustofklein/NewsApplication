@@ -55,17 +55,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         inicializa_bd_local();
-        atualiza_headlines_bd_local();
-        verifica_disponibilidade_aplicacao();
         processa_carregamento_headlines();
+        verifica_disponibilidade_aplicacao();
 
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
+        atualiza_headlines_bd_local();
+
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
                 switch (item.getItemId()) {
                     case R.id.nav_historico:
                         verifica_disponibilidade_aplicacao();
@@ -105,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void atualiza_headlines_bd_local(){
-
         if(verifica_conexao_mobile()){
             bd.deletaTodasHeadLines();
             grava_headlines_bd_local();
@@ -138,13 +137,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void processa_carregamento_headlines(){
-
         if(verifica_conexao_mobile()){
             processa_carregamento_dados_online(retorna_dados_endpoint_headlines());
         } else {
             processa_carregamento_dados_offline(retorna_dados_headlines_bd());
         }
-
     }
 
     private Call<NewsResponse> retorna_dados_endpoint_headlines(){
@@ -156,8 +153,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Artigo> retorna_dados_headlines_bd(){
         ArrayList<Artigo> artigos;
-
-        artigos = bd.getAllArtigos();
+        artigos = bd.getAllHeadLineArticles();
 
         return artigos;
     }
@@ -174,14 +170,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void processa_carregamento_dados_online(Call<NewsResponse> call){
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         call.enqueue(new Callback<NewsResponse>() {
             @Override
             public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
                 int statusCode = response.code();
                 List<Artigo> artigos = response.body().getResults();
-                recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
+                adicionaRegistroTela(artigos);
             }
 
             @Override
@@ -194,7 +188,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processa_carregamento_dados_offline(ArrayList<Artigo> artigos){
+        artigos = bd.getAllHeadLineArticles();
+        adicionaRegistroTela(artigos);
+    }
 
+    private void adicionaRegistroTela(List<Artigo> artigos){
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
     }
 
     private void mostraAlerta(String titulo, String mensagem) {

@@ -134,12 +134,32 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
     }
 
+    public ArrayList<Artigo> getAllHeadLineArticles(){
+
+        ArrayList<Artigo> listaArtigos = new ArrayList<Artigo>();
+
+        String query = "SELECT *" +
+                       "  FROM " + TABELA_ARTIGO +
+                       " WHERE " + ARTIGO_TIPO + " = 3";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Artigo artigo = cursorToArtigo(cursor);
+                listaArtigos.add(artigo);
+            } while (cursor.moveToNext());
+        }
+
+        return listaArtigos;
+    }
+
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABELA_SOURCE);
         db.execSQL("DROP TABLE IF EXISTS " + TABELA_ARTIGO);
         //db.execSQL("DROP TABLE IF EXISTS " + TABELA_FAVORITOS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO);
-        db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO_ARTIGO);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO_ARTIGO);
         this.onCreate(db);
     }
 
@@ -212,7 +232,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         } else {
             cursor.moveToFirst();
             Artigo artigo = cursorToArtigo(cursor);
-            artigo.setSource(getSource(artigo.getIdSource()));
+            //artigo.setSource(getSource(artigo.getIdSource()));
             return artigo;
         }
     }
@@ -247,6 +267,11 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private Artigo cursorToArtigo(Cursor cursor) {
         Artigo artigo = new Artigo();
         artigo.setId(Integer.parseInt(cursor.getString(0)));
+        artigo.setIdSource(cursor.getString(2));
+        artigo.setAuthor(cursor.getString(3));
+        artigo.setTitle(cursor.getString(4));
+        artigo.setUrl(cursor.getString(6));
+        artigo.setPublishedAt(cursor.getString(8));
         return artigo;
     }
 /*
