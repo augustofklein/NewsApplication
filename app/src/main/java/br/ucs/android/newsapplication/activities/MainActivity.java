@@ -23,6 +23,7 @@ import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -118,14 +119,26 @@ public class MainActivity extends AppCompatActivity {
     public void processa_carregamento_headlines(){
 
         if(verifica_conexao_mobile()){
-            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
-
-            processa_carregamento_dados(call);
+            processa_carregamento_dados_online(retorna_dados_endpoint_headlines());
         } else {
-            // CARREGAMENTO DO BANCO LOCAL
+            processa_carregamento_dados_offline(retorna_dados_headlines_bd());
         }
 
+    }
+
+    private Call<NewsResponse> retorna_dados_endpoint_headlines(){
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+
+        return call;
+    }
+
+    private ArrayList<Artigo> retorna_dados_headlines_bd(){
+        ArrayList<Artigo> artigos;
+
+        artigos = bd.getAllArtigos();
+
+        return artigos;
     }
 
     public void processa_carregamento_search(String pesquisa){
@@ -136,10 +149,10 @@ public class MainActivity extends AppCompatActivity {
         ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
         Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
 
-        processa_carregamento_dados(call);
+        processa_carregamento_dados_online(call);
     }
 
-    public void processa_carregamento_dados(Call<NewsResponse> call){
+    public void processa_carregamento_dados_online(Call<NewsResponse> call){
         final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         call.enqueue(new Callback<NewsResponse>() {
@@ -157,6 +170,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, t.toString());
             }
         });
+    }
+
+    private void processa_carregamento_dados_offline(ArrayList<Artigo> artigos){
+
     }
 
     private void mostraAlerta(String titulo, String mensagem) {
