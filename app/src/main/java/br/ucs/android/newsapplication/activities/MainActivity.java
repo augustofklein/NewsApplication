@@ -43,13 +43,9 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    // Aqui vai a chave da API
     private final static String API_KEY = "16613c31e3b54b27bf64db1ba67bfe95";
-
     public BottomNavigationView bnvMenu;
     public FragmentManager fragmentManager;
-
     private BDSQLiteHelper bd;
 
     @Override
@@ -57,18 +53,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bd = new BDSQLiteHelper(this);
+        inicializa_bd_local();
+        atualiza_headlines_bd_local();
+        verifica_disponibilidade_aplicacao();
+        processa_carregamento_headlines();
 
         bnvMenu = (BottomNavigationView) findViewById(R.id.bnvMenu);
         fragmentManager = getSupportFragmentManager();
 
-        verifica_disponibilidade_aplicacao();
-
-        processa_carregamento_headlines();
-
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
                 switch (item.getItemId()) {
                     case R.id.nav_historico:
                         verifica_disponibilidade_aplicacao();
@@ -101,6 +97,22 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void inicializa_bd_local(){
+        bd = new BDSQLiteHelper(this);
+    }
+
+    private void atualiza_headlines_bd_local(){
+
+    }
+
+    private void atualiza_historico_bd_local(){
+
+    }
+
+    private void atualiza_favoritos_bd_local(){
+
     }
 
     public void processa_carregamento_headlines(){

@@ -17,21 +17,15 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "NewsAppDB";
-
     private static final String TABELA_SOURCE = "source";
     private static final String TABELA_ARTIGO = "artigo";
     private static final String TABELA_FAVORITOS = "favorito";
     private static final String TABELA_HISTORICO = "historico";
     private static final String TABELA_HISTORICO_ARTIGO = "historico_artigo";
-
     private static final String ID = "id";
-
     private static final String SOURCE_ID = "source_id";
     private static final String SOURCE_NAME = "source_name";
-
     private static final String[] COLUNAS_SOURCE = {ID, SOURCE_ID, SOURCE_NAME};
-
-
     private static final String ARTIGO_SOURCE = "idSource";
     private static final String ARTIGO_AUTHOR = "author";
     private static final String ARTIGO_TITLE = "title";
@@ -42,25 +36,17 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String ARTIGO_CONTENT = "content";
     private static final String[] COLUNAS_ARTIGO = {ID, ARTIGO_SOURCE, ARTIGO_AUTHOR, ARTIGO_TITLE,
             ARTIGO_DESCRIPTION, ARTIGO_URL, ARTIGO_URLTOIMAGE, ARTIGO_PUBLISHEDAT, ARTIGO_CONTENT};
-
     private static final String FAVORITOS_ARTIGO = "idArtigo";
     private static final String FAVORITOS_DATA = "data";
     private static final String FAVORITOS_OBSERVACAO = "observacao";
-
     private static final String[] COLUNAS_FAVORITOS = {ID, FAVORITOS_ARTIGO, FAVORITOS_DATA,
             FAVORITOS_OBSERVACAO};
-
     private static final String HISTORICO_DATA = "data";
     private static final String HISTORICO_TERMO = "termo";
-
     private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO};
-
     private static final String HISTORICO_ARTIGO_ARTIGO = "idArtigo";
     private static final String HISTORICO_ARTIGO_HISTORICO = "idHistorico";
-
     private static final String[] COLUNAS_HISTORICO_ARTIGO = {HISTORICO_ARTIGO_ARTIGO, HISTORICO_ARTIGO_HISTORICO};
-
-
     public BDSQLiteHelper(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
