@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 List<Artigo> artigos = response.body().getResults();
 
                 for(int i = 0; i<artigos.size(); i++){
-                    bd.addArtigo(artigos.get(i), 3);
+                    bd.addArtigo(artigos.get(i), 1);
                 }
             }
 

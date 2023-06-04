@@ -129,9 +129,8 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
         int i = db.delete(TABELA_ARTIGO,
                 ARTIGO_TIPO + " = ?",
-                new String[] { String.valueOf(3) });
+                new String[] { String.valueOf(1) });
         db.close();
-
     }
 
     public ArrayList<Artigo> getAllHeadLineArticles(){
@@ -140,7 +139,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
         String query = "SELECT *" +
                        "  FROM " + TABELA_ARTIGO +
-                       " WHERE " + ARTIGO_TIPO + " = 3";
+                       " WHERE " + ARTIGO_TIPO + " = 1";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
 
@@ -373,6 +372,4 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         db.close();
         return i;
     }
-
 }
-
