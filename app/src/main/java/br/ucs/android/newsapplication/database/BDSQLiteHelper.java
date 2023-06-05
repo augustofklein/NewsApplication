@@ -20,8 +20,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String DATABASE_NAME = "NewsAppDB";
     private static final String TABELA_SOURCE = "source";
     private static final String TABELA_ARTIGO = "artigo";
-    private static final String TABELA_HEADLINES = "headline";
-    private static final String TABELA_FAVORITOS = "favorito";
     private static final String TABELA_HISTORICO = "historico";
     private static final String TABELA_HISTORICO_ARTIGO = "historico_artigo";
     private static final String ID = "id";
@@ -39,12 +37,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String ARTIGO_CONTENT = "content";
     private static final String[] COLUNAS_ARTIGO = {ID, ARTIGO_SOURCE, ARTIGO_AUTHOR, ARTIGO_TITLE,
             ARTIGO_DESCRIPTION, ARTIGO_URL, ARTIGO_URLTOIMAGE, ARTIGO_PUBLISHEDAT, ARTIGO_CONTENT};
-    private static final String HEADLINE_ARTIGO = "idHeadline";
-    private static final String FAVORITOS_ARTIGO = "idArtigo";
-    private static final String FAVORITOS_DATA = "data";
-    private static final String FAVORITOS_OBSERVACAO = "observacao";
-    private static final String[] COLUNAS_FAVORITOS = {ID, FAVORITOS_ARTIGO, FAVORITOS_DATA,
-            FAVORITOS_OBSERVACAO};
     private static final String HISTORICO_DATA = "data";
     private static final String HISTORICO_TERMO = "termo";
     private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO};
@@ -81,29 +73,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 "ON DELETE CASCADE " +
                 "ON UPDATE NO ACTION)";
         db.execSQL(CREATE_TABLE);
-/*
-        CREATE_TABLE = "CREATE TABLE " + TABELA_HEADLINES + " ( " +
-                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                HEADLINE_ARTIGO + " INTEGER, " +
-                HEADLINE_DATA + " TEXT, " +
-                HEADLINE_OBSERVACAO + " TEXT, " +
-                "FOREIGN KEY ( " + HEADLINE_ARTIGO + " ) " +
-                "REFERENCES " + TABELA_ARTIGO + " ( " + ID + " )" +
-                "ON DELETE CASCADE " +
-                "ON UPDATE NO ACTION) ";
-        db.execSQL(CREATE_TABLE);
 
-        CREATE_TABLE = "CREATE TABLE " + TABELA_FAVORITOS + " ( " +
-                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                FAVORITOS_ARTIGO + " INTEGER, " +
-                FAVORITOS_DATA + " TEXT, " +
-                FAVORITOS_OBSERVACAO + " TEXT, " +
-                "FOREIGN KEY ( " + FAVORITOS_ARTIGO + " ) " +
-                "REFERENCES " + TABELA_ARTIGO + " ( " + ID + " )" +
-                "ON DELETE CASCADE " +
-                "ON UPDATE NO ACTION) ";
-        db.execSQL(CREATE_TABLE);
-*/
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HISTORICO_DATA + " TEXT, " +
@@ -122,6 +92,14 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 "ON DELETE CASCADE " +
                 "ON UPDATE NO ACTION ) ";
         db.execSQL(CREATE_TABLE);
+    }
+
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABELA_SOURCE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABELA_ARTIGO);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO);
+        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO_ARTIGO);
+        this.onCreate(db);
     }
 
     public void deletaTodasHeadLines(){
@@ -153,13 +131,24 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         return listaArtigos;
     }
 
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABELA_SOURCE);
-        db.execSQL("DROP TABLE IF EXISTS " + TABELA_ARTIGO);
-        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_FAVORITOS);
-        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO);
-        //db.execSQL("DROP TABLE IF EXISTS " + TABELA_HISTORICO_ARTIGO);
-        this.onCreate(db);
+    public ArrayList<Artigo> getAllFavoritesArticles(){
+
+        ArrayList<Artigo> listaArtigos = new ArrayList<Artigo>();
+
+        String query = "SELECT *" +
+                       "  FROM " + TABELA_ARTIGO +
+                       " WHERE " + ARTIGO_TIPO + " = 2";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Artigo artigo = cursorToArtigo(cursor);
+                listaArtigos.add(artigo);
+            } while (cursor.moveToNext());
+        }
+
+        return listaArtigos;
     }
 
     public void addArtigo(Artigo article, int tipo) {
@@ -177,17 +166,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         db.insert(TABELA_ARTIGO, null, values);
         db.close();
     }
-/*
-    public void addFavorito(Favorito favorito) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(FAVORITOS_ARTIGO, favorito.getArtigo().getId());
-        values.put(FAVORITOS_DATA, favorito.getData().toLocaleString());
-        values.put(FAVORITOS_OBSERVACAO, favorito.getObservacao());
-        db.insert(TABELA_FAVORITOS, null, values);
-        db.close();
-    }
- */
+
     public void addHistorico(Historico historico) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -235,27 +214,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
             return artigo;
         }
     }
-/*
-    public Favorito getFavorito(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABELA_FAVORITOS, // a. tabela
-                COLUNAS_FAVORITOS, // b. colunas
-                " id = ?", // c. colunas para comparar
-                new String[] { String.valueOf(id) }, // d. parâmetros
-                null, // e. group by
-                null, // f. having
-                null, // g. order by
-                null); // h. limit
-        if (cursor == null) {
-            return null;
-        } else {
-            cursor.moveToFirst();
-            Favorito favorito = cursorToFavorito(cursor);
-            favorito.setArtigo(getArtigo(favorito.getIdArtigo()));
-            return favorito;
-        }
-    }
- */
     private Source cursorToSource(Cursor cursor) {
         Source source = new Source();
         source.setId(cursor.getString(0));
@@ -273,16 +231,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         artigo.setPublishedAt(cursor.getString(8));
         return artigo;
     }
-/*
-    private Favorito cursorToFavorito(Cursor cursor) {
-        Favorito favorito = new Favorito();
-        favorito.setId(Integer.parseInt(cursor.getString(0)));
-        favorito.setIdArtigo(Integer.parseInt(cursor.getString(1)));
-        //favorito.setData((cursor.getString(2)));
-        favorito.setObservacao(cursor.getString(3));
-        return favorito;
-    }
- */
 
     private Historico cursorToHistorico(Cursor cursor) {
         Historico historico = new Historico();
@@ -304,22 +252,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         }
         return listaNews;
     }
-/*
-    public ArrayList<Favorito> getAllFavoritos() {
-        ArrayList<Favorito> listaFavoritos = new ArrayList<Favorito>();
-        String query = "SELECT * FROM " + TABELA_FAVORITOS
-                + " ORDER BY " + FAVORITOS_DATA + " DESC";
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
-        if (cursor.moveToFirst()) {
-            do {
-                Favorito favorito = cursorToFavorito(cursor);
-                listaFavoritos.add(favorito);
-            } while (cursor.moveToNext());
-        }
-        return listaFavoritos;
-    }
- */
 
     public ArrayList<Historico> getAllHistorico() {
         ArrayList<Historico> listaHistorico = new ArrayList<Historico>();
@@ -355,15 +287,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         db.close();
         return i; // número de linhas excluídas
     }
-/*
-    public int deleteFavoritos() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int i = db.delete(TABELA_FAVORITOS, //tabela
-                ID + " <> ?", new String[] { "0" });
-        db.close();
-        return i;
-    }
- */
 
     public int deleteHistorico() {
         SQLiteDatabase db = this.getWritableDatabase();
