@@ -7,16 +7,15 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -34,7 +33,7 @@ import br.ucs.android.newsapplication.adapter.NewsAdapter;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
 import br.ucs.android.newsapplication.model.NewsResponse;
-import br.ucs.android.newsapplication.model.Source;
+import br.ucs.android.newsapplication.model.WebViewClientImpl;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
 import retrofit2.Call;
@@ -98,6 +97,25 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    public void onClickSelecao(View v){
+
+        WebView myWebView;
+
+        myWebView = (WebView) findViewById(R.id.webView);
+
+        WebViewClientImpl webViewClient = new WebViewClientImpl(this);
+
+        myWebView.setWebViewClient(webViewClient);
+        //myWebView.setWebViewClient(new WebViewClient());
+
+        myWebView.loadUrl("https://ava.ucs.br");
+        //myWebView.loadUrl("file:///android_asset/html/index.html");
+
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+
     }
 
     private void inicializa_bd_local(){
