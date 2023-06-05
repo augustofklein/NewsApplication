@@ -73,7 +73,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 "ON DELETE CASCADE " +
                 "ON UPDATE NO ACTION)";
         db.execSQL(CREATE_TABLE);
-
+        
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HISTORICO_DATA + " TEXT, " +
@@ -166,7 +166,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         db.insert(TABELA_ARTIGO, null, values);
         db.close();
     }
-
+    
     public void addHistorico(Historico historico) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
