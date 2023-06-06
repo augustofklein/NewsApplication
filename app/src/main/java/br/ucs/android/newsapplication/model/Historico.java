@@ -13,6 +13,8 @@ public class Historico {
 
     private ArrayList<Artigo> resultados;
 
+    private int quantidade;
+
 
     public int getId() {
         return id;
@@ -46,5 +48,11 @@ public class Historico {
         this.resultados = resultados;
     }
 
+    public int getQuantidade() {
+        return quantidade;
+    }
 
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
 }

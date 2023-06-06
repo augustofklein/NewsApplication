@@ -22,12 +22,14 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.MovieViewHolde
         LinearLayout moviesLayout;
         TextView title;
         TextView author;
+        TextView source;
 
         public MovieViewHolder(View v) {
             super(v);
             moviesLayout = (LinearLayout) v.findViewById(R.id.article_layout);
-            title = (TextView) v.findViewById(R.id.title);
-            author = (TextView) v.findViewById(R.id.author);
+            title = (TextView) v.findViewById(R.id.tvTituloArtigo);
+            author = (TextView) v.findViewById(R.id.tvAutorArtigo);
+            source = (TextView) v.findViewById(R.id.tvSourceArtigo);
         }
     }
 
@@ -47,6 +49,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.MovieViewHolde
     public void onBindViewHolder(MovieViewHolder holder, final int position) {
         holder.title.setText(artigos.get(position).getTitle());
         holder.author.setText(artigos.get(position).getAuthor());
+        holder.source.setText(artigos.get(position).getSource().getName());
     }
 
     @Override

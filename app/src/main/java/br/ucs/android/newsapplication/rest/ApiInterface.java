@@ -10,7 +10,7 @@ public interface ApiInterface {
 
     // BUSCA GERAL DA PESQUISA DO USUÁRIO
     @GET("everything?sortBy=publishedAt")
-    Call<NewsResponse> getSearchByUser(@Query("search") String search, @Query("data") String string, @Query("apiKey") String apiKey);
+    Call<NewsResponse> getSearchByUser(@Query("q") String search, @Query("from") String string, @Query("apiKey") String apiKey);
 
     // BUSCA DAS NOTÍCIAS DO MOMENTO
     @GET("top-headlines")

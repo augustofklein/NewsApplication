@@ -5,35 +5,39 @@ import com.google.gson.annotations.SerializedName;
 
 public class Source {
 
+    private int idSource;
     @SerializedName("id")
     @Expose
-    private String source_id;
+    private String id;
     @SerializedName("name")
     @Expose
-    private String source_name;
+    private String name;
+
+    public int getIdSource() {
+        return idSource;
+    }
+
+    public void setIdSource(int id) {
+        this.idSource = id;
+    }
 
     public String getId() {
-        return source_id;
+        return id;
     }
 
     public void setId(String id) {
-        this.source_id = id;
+        if(id == null || id.equals("null"))
+            this.id = id ;
+        else
+            this.id = "";
     }
 
-    public String getSource_id() {
-        return source_id;
+    public String getName() {
+        return name;
     }
 
-    public void setSource_id(String source_id) {
-        this.source_id = source_id;
-    }
-
-    public String getSource_name() {
-        return source_name;
-    }
-
-    public void setSource_name(String source_name) {
-        this.source_name = source_name;
+    public void setName(String name) {
+        this.name = name;
     }
 
 }
