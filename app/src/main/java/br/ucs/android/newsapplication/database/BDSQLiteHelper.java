@@ -18,15 +18,20 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "NewsAppDB";
+
     private static final String TABELA_SOURCE = "source";
     private static final String TABELA_ARTIGO = "artigo";
     private static final String TABELA_HISTORICO = "historico";
     private static final String TABELA_HISTORICO_ARTIGO = "historico_artigo";
+
     private static final String ID = "id";
     private static final String ARTIGO_TIPO = "tipo";
     private static final String SOURCE_ID = "source_id";
     private static final String SOURCE_NAME = "source_name";
+
     private static final String[] COLUNAS_SOURCE = {ID, SOURCE_ID, SOURCE_NAME};
+
+
     private static final String ARTIGO_SOURCE = "idSource";
     private static final String ARTIGO_AUTHOR = "author";
     private static final String ARTIGO_TITLE = "title";
@@ -39,10 +44,16 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
             ARTIGO_DESCRIPTION, ARTIGO_URL, ARTIGO_URLTOIMAGE, ARTIGO_PUBLISHEDAT, ARTIGO_CONTENT};
     private static final String HISTORICO_DATA = "data";
     private static final String HISTORICO_TERMO = "termo";
-    private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO};
+    private static final String HISTORICO_RESULTADOS = "resultados";
+
+    private static final String[] COLUNAS_HISTORICO = {ID, HISTORICO_DATA, HISTORICO_TERMO, HISTORICO_RESULTADOS};
+
     private static final String HISTORICO_ARTIGO_ARTIGO = "idArtigo";
     private static final String HISTORICO_ARTIGO_HISTORICO = "idHistorico";
+
     private static final String[] COLUNAS_HISTORICO_ARTIGO = {HISTORICO_ARTIGO_ARTIGO, HISTORICO_ARTIGO_HISTORICO};
+
+
     public BDSQLiteHelper(Context context)
     {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -77,7 +88,8 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 HISTORICO_DATA + " TEXT, " +
-                HISTORICO_TERMO + " TEXT ) ";
+                HISTORICO_TERMO + " TEXT, " +
+                HISTORICO_RESULTADOS + " INTEGER ) ";
         db.execSQL(CREATE_TABLE);
 
         CREATE_TABLE = "CREATE TABLE " + TABELA_HISTORICO_ARTIGO + " ( " +
@@ -163,7 +175,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         values.put(ARTIGO_URLTOIMAGE, article.getUrlToImage());
         values.put(ARTIGO_PUBLISHEDAT, article.getPublishedAt());
         values.put(ARTIGO_CONTENT, article.getContent());
-        db.insert(TABELA_ARTIGO, null, values);
+        long id = db.insert(TABELA_ARTIGO, null, values);
         db.close();
     }
     
@@ -172,7 +184,23 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         ContentValues values = new ContentValues();
         values.put(HISTORICO_DATA, historico.getData().toLocaleString());
         values.put(HISTORICO_TERMO, historico.getTermo());
-        db.insert(TABELA_HISTORICO, null, values);
+        values.put(HISTORICO_RESULTADOS, historico.getResultados().size());
+        historico.setId((int) db.insert(TABELA_HISTORICO, null, values));
+        db.close();
+
+        for (var artigo : historico.getResultados()) {
+            //artigo.setId((int) addArtigo(artigo));
+            addArtigoHistorico(artigo.getId(), historico.getId());
+        }
+    }
+
+    private void addArtigoHistorico(int idArtigo, int idHistorico)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(HISTORICO_ARTIGO_ARTIGO, idArtigo);
+        values.put(HISTORICO_ARTIGO_HISTORICO, idHistorico);
+        db.insert(TABELA_HISTORICO_ARTIGO, null, values);
         db.close();
     }
 
@@ -216,7 +244,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     }
     private Source cursorToSource(Cursor cursor) {
         Source source = new Source();
-        source.setId(cursor.getString(0));
+        //source.setId(Integer.parseInt(cursor.getString(0)));
         source.setSource_id(cursor.getString(1));
         source.setSource_name(cursor.getString(2));
         return source;

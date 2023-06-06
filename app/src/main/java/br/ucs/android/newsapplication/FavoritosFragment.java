@@ -12,6 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+
+import br.ucs.android.newsapplication.database.BDSQLiteHelper;
+import br.ucs.android.newsapplication.model.Artigo;
+import br.ucs.android.newsapplication.model.Favorito;
 import br.ucs.android.newsapplication.placeholder.PlaceholderContent;
 
 /**
@@ -23,6 +28,8 @@ public class FavoritosFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
+
+    private BDSQLiteHelper bd;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -53,12 +60,13 @@ public class FavoritosFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_favoritos, container, false);
+
+        bd = new BDSQLiteHelper(getContext());
+
+        ArrayList<Artigo> favoritos = bd.getAllFavoritesArticles();
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -69,7 +77,7 @@ public class FavoritosFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new FavoritosRecyclerViewAdapter(PlaceholderContent.ITEMS));
+            //recyclerView.setAdapter(new FavoritosRecyclerViewAdapter(favoritos));
         }
         return view;
     }
