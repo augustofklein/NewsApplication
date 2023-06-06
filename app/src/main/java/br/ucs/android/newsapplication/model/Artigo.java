@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 public class Artigo {
 
     private int id;
-    private int idSource;
+    private String idSource;
     @SerializedName("source")
     @Expose
     private Source source;
@@ -40,11 +40,11 @@ public class Artigo {
         this.id = id;
     }
 
-    public int getIdSource() {
+    public String getIdSource() {
         return idSource;
     }
 
-    public void setIdSource(int idSource) {
+    public void setIdSource(String idSource) {
         this.idSource = idSource;
     }
 

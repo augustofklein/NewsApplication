@@ -4,12 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
-import android.text.style.TtsSpan;
 
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Date;
 
 import br.ucs.android.newsapplication.model.Artigo;
 import br.ucs.android.newsapplication.model.Favorito;
@@ -28,7 +25,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     private static final String TABELA_HISTORICO_ARTIGO = "historico_artigo";
 
     private static final String ID = "id";
-
+    private static final String ARTIGO_TIPO = "tipo";
     private static final String SOURCE_ID = "source_id";
     private static final String SOURCE_NAME = "source_name";
 
@@ -81,6 +78,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
         CREATE_TABLE = "CREATE TABLE " + TABELA_ARTIGO + " ( " +
                 ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                ARTIGO_TIPO + " INTEGER, " +
                 ARTIGO_SOURCE + " INTEGER, " +
                 ARTIGO_AUTHOR + " TEXT, " +
                 ARTIGO_TITLE + " TEXT, " +
@@ -163,7 +161,8 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(ARTIGO_SOURCE, article.getIdSource());
+        values.put(ARTIGO_TIPO, tipo);
+        values.put(ARTIGO_SOURCE, article.getSource().getId());
         values.put(ARTIGO_AUTHOR, article.getAuthor());
         values.put(ARTIGO_TITLE, article.getTitle());
         values.put(ARTIGO_DESCRIPTION, article.getDescription());
@@ -176,19 +175,107 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         return id;
     }
 
-    public void addFavorito(Favorito favorito) {
+    public Artigo getArtigo(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABELA_ARTIGO, // a. tabela
+                COLUNAS_ARTIGO, // b. colunas
+                " id = ?", // c. colunas para comparar
+                new String[] { String.valueOf(id) }, // d. parâmetros
+                null, // e. group by
+                null, // f. having
+                null, // g. order by
+                null); // h. limit
+        if (cursor == null) {
+            return null;
+        } else {
+            cursor.moveToFirst();
+            Artigo artigo = cursorToArtigo(cursor);
+            //artigo.setSource(getSource(artigo.getIdSource()));
+            return artigo;
+        }
+    }
 
-        if(favorito.getIdArtigo() == 0)
-            favorito.setIdArtigo((int) addArtigo(favorito.getArtigo()));
+    public ArrayList<Artigo> getAllArtigos() {
+        ArrayList<Artigo> listaNews = new ArrayList<Artigo>();
+        String query = "SELECT * FROM " + TABELA_ARTIGO +
+                " ORDER BY " + ARTIGO_TITLE;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Artigo artigo = cursorToArtigo(cursor);
+                listaNews.add(artigo);
+            } while (cursor.moveToNext());
+        }
+        return listaNews;
+    }
 
+    public int deleteArtigo(Artigo article) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(FAVORITOS_ARTIGO, favorito.getIdArtigo());
-        values.put(FAVORITOS_DATA, favorito.getData().getTime());
-        values.put(FAVORITOS_OBSERVACAO, favorito.getObservacao());
-        db.insert(TABELA_FAVORITOS, null, values);
+        int i = db.delete(TABELA_ARTIGO, //tabela
+                ID + " = ?", new String[] { String.valueOf(article.getId()) });
+        db.close();
+        return i; // número de linhas excluídas
+    }
+
+    public ArrayList<Artigo> getAllHeadLineArticles(){
+
+        ArrayList<Artigo> listaArtigos = new ArrayList<Artigo>();
+
+        String query = "SELECT *" +
+                       "  FROM " + TABELA_ARTIGO +
+                       " WHERE " + ARTIGO_TIPO + " = 1";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Artigo artigo = cursorToArtigo(cursor);
+                listaArtigos.add(artigo);
+            } while (cursor.moveToNext());
+        }
+
+        return listaArtigos;
+    }
+
+    public void deletaTodasHeadLines(){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int i = db.delete(TABELA_ARTIGO,
+                ARTIGO_TIPO + " = ?",
+                new String[] { String.valueOf(1) });
         db.close();
     }
+
+    public ArrayList<Artigo> getAllFavoritesArticles(){
+
+        ArrayList<Artigo> listaArtigos = new ArrayList<Artigo>();
+
+        String query = "SELECT *" +
+                       "  FROM " + TABELA_ARTIGO +
+                       " WHERE " + ARTIGO_TIPO + " = 2";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Artigo artigo = cursorToArtigo(cursor);
+                listaArtigos.add(artigo);
+            } while (cursor.moveToNext());
+        }
+
+        return listaArtigos;
+    }
+
+    public void deletaTodasFavoritas(){
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        int i = db.delete(TABELA_ARTIGO,
+                ARTIGO_TIPO + " = ?",
+                new String[] { String.valueOf(2) });
+        db.close();
+    }
+    
     public void addHistorico(Historico historico) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -305,22 +392,14 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
     }
     private Source cursorToSource(Cursor cursor) {
         Source source = new Source();
-        source.setIdSource(cursor.getInt(0));
-        source.setId(cursor.getString(1));
-        source.setName(cursor.getString(2));
+        source.setId(Integer.parseInt(cursor.getString(0)));
+        source.setSource_id(cursor.getString(1));
+        source.setSource_name(cursor.getString(2));
         return source;
     }
     private Artigo cursorToArtigo(Cursor cursor) {
         Artigo artigo = new Artigo();
-        artigo.setId(cursor.getInt(0));
-        artigo.setIdSource(cursor.getInt(1));
-        artigo.setAuthor(cursor.getString(2));
-        artigo.setTitle(cursor.getString(3));
-        artigo.setDescription(cursor.getString(4));
-        artigo.setUrl(cursor.getString(5));
-        artigo.setUrlToImage(cursor.getString(6));
-        artigo.setPublishedAt(cursor.getString(7));
-        artigo.setContent(cursor.getString(8));
+        artigo.setId(Integer.parseInt(cursor.getString(0)));
         return artigo;
     }
 
@@ -328,7 +407,7 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
         Favorito favorito = new Favorito();
         favorito.setId(Integer.parseInt(cursor.getString(0)));
         favorito.setIdArtigo(Integer.parseInt(cursor.getString(1)));
-        favorito.setData(new Date(Long.parseLong(cursor.getString(2))));
+        //favorito.setData((cursor.getString(2)));
         favorito.setObservacao(cursor.getString(3));
         return favorito;
     }
@@ -369,11 +448,6 @@ public class BDSQLiteHelper extends SQLiteOpenHelper
                 listaFavoritos.add(favorito);
             } while (cursor.moveToNext());
         }
-
-        for ( Favorito fav : listaFavoritos ) {
-            fav.setArtigo(getArtigo(fav.getIdArtigo()));
-        }
-
         return listaFavoritos;
     }
 

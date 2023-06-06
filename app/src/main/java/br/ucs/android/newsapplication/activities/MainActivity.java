@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -25,10 +27,13 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.ucs.android.newsapplication.BuscarFragment;
+import br.ucs.android.newsapplication.FavoritosFragment;
 import br.ucs.android.newsapplication.R;
 import br.ucs.android.newsapplication.adapter.FavoritoAdapter;
 import br.ucs.android.newsapplication.adapter.HistoricoAdapter;
@@ -38,7 +43,7 @@ import br.ucs.android.newsapplication.model.Artigo;
 import br.ucs.android.newsapplication.model.Favorito;
 import br.ucs.android.newsapplication.model.Historico;
 import br.ucs.android.newsapplication.model.NewsResponse;
-import br.ucs.android.newsapplication.model.Source;
+import br.ucs.android.newsapplication.model.WebViewClientImpl;
 import br.ucs.android.newsapplication.rest.ApiClient;
 import br.ucs.android.newsapplication.rest.ApiInterface;
 import retrofit2.Call;
@@ -64,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         inicializa_bd_local();
-        //populaBanco();
         atualiza_headlines_bd_local();
         verifica_disponibilidade_aplicacao();
         processa_carregamento_headlines();
@@ -88,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        atualiza_headlines_bd_local();
 
         bnvMenu.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
@@ -145,45 +151,34 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void onClickSelecao(View v){
+
+        WebView myWebView;
+
+        myWebView = (WebView) findViewById(R.id.webView);
+
+        WebViewClientImpl webViewClient = new WebViewClientImpl(this);
+
+        myWebView.setWebViewClient(webViewClient);
+        //myWebView.setWebViewClient(new WebViewClient());
+
+        myWebView.loadUrl("https://ava.ucs.br");
+        //myWebView.loadUrl("file:///android_asset/html/index.html");
+
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+
+    }
+
     private void inicializa_bd_local(){
         bd = new BDSQLiteHelper(this);
     }
 
-    public void populaBanco()
-    {
-        Artigo artigo = new Artigo();
-
-        Source source = new Source();
-        source.setId("techcrunch");
-        source.setName("TechCrunch");
-
-        long idsource = bd.addSource(source);
-        artigo.setIdSource((int) idsource);
-        source.setIdSource((int) idsource);
-
-        artigo.setSource(source);
-
-        artigo.setAuthor("Taylor Hatmaker");
-        artigo.setTitle("YouTube rolls back its rules against election misinformation");
-        artigo.setDescription("YouTube reverses its rules against some election misinformation, allowing some previously prohibited content around U.S. elections.");
-        artigo.setContent("YouTube was the slowest major platform to disallow misinformation during the 2020 U.S. election and almost three years later, the company will toss that policy out altogether.\\r\\nThe company announced … [+1993 chars]");
-        artigo.setUrl("\"https://techcrunch.com/2023/06/03/youtube-rolls-back-its-rules-against-election-misinformation/");
-        artigo.setUrlToImage("\"https://techcrunch.com/wp-content/uploads/2022/04/youtube-ios-app.webp?resize=1200,674");
-        artigo.setPublishedAt("2023-06-03T22:57:34Z");
-
-        long id = bd.addArtigo(artigo);
-
-        Favorito favorito = new Favorito();
-        favorito.setData(new Date());
-        favorito.setObservacao("Bem legal essa notícia!");
-        favorito.setArtigo(artigo);
-        favorito.setIdArtigo((int) id);
-
-        bd.addFavorito(favorito);
-    }
-
     private void atualiza_headlines_bd_local(){
-
+        if(verifica_conexao_mobile()){
+            bd.deletaTodasHeadLines();
+            grava_headlines_bd_local();
+        }
     }
 
     private void atualiza_historico_bd_local(){
@@ -191,24 +186,56 @@ public class MainActivity extends AppCompatActivity {
         listaHistorico.setLayoutManager(new LinearLayoutManager(this));
         listaHistorico.setAdapter(new HistoricoAdapter(historico, R.layout.item_historico, this));
     }
+    private void grava_headlines_bd_local(){
+        Call<NewsResponse> call;
+
+        call = retorna_dados_endpoint_headlines();
+
+        call.enqueue(new Callback<NewsResponse>() {
+            @Override
+            public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
+                int statusCode = response.code();
+                List<Artigo> artigos = response.body().getResults();
+
+                for(int i = 0; i<artigos.size(); i++){
+                    bd.addArtigo(artigos.get(i), 1);
+                }
+            }
 
     private void atualiza_favoritos_bd_local(){
         List<Favorito> favoritos = bd.getAllFavoritos();
         listaFavoritos.setLayoutManager(new LinearLayoutManager(this));
         listaFavoritos.setAdapter(new FavoritoAdapter(favoritos, R.layout.item_favoritos, this));
+            @Override
+            public void onFailure(Call<NewsResponse> call, Throwable t) {
+                mostraAlerta("Erro", t.toString());
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
     }
 
     public void processa_carregamento_headlines(){
 
         if(verifica_conexao_mobile()){
-            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
-
-            processa_carregamento_dados(call, R.id.rvInicial);
+            processa_carregamento_dados_online(retorna_dados_endpoint_headlines());
         } else {
-            // CARREGAMENTO DO BANCO LOCAL
+            processa_carregamento_dados_offline(retorna_dados_headlines_bd());
         }
+    }
 
+    private Call<NewsResponse> retorna_dados_endpoint_headlines(){
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<NewsResponse> call = apiService.getTopHeadLines("BR", "business", API_KEY);
+
+        return call;
+    }
+
+    private ArrayList<Artigo> retorna_dados_headlines_bd(){
+        ArrayList<Artigo> artigos;
+        artigos = bd.getAllHeadLineArticles();
+
+        return artigos;
     }
 
     public void processa_carregamento_search(String pesquisa){
@@ -221,29 +248,16 @@ public class MainActivity extends AppCompatActivity {
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
             Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
 
-            processa_carregamento_dados(call, R.id.rvBuscar);
-        }
+        processa_carregamento_dados_online(call);
     }
 
-    public void processa_carregamento_dados(Call<NewsResponse> call, int idLista){
-        final RecyclerView recyclerView = (RecyclerView) findViewById(idLista);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    public void processa_carregamento_dados_online(Call<NewsResponse> call){
         call.enqueue(new Callback<NewsResponse>() {
             @Override
             public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
                 int statusCode = response.code();
                 List<Artigo> artigos = response.body().getResults();
-                recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
-
-                if(idLista == R.id.rvBuscar) {
-                    Historico hist = new Historico();
-                    hist.setData(new Date());
-                    hist.setTermo(campoBusca.getText().toString());
-                    hist.setQuantidade(artigos.size());
-                    hist.setResultados((ArrayList<Artigo>) artigos);
-
-                    bd.addHistorico(hist);
-                }
+                adicionaRegistroTela(artigos);
             }
 
             @Override
@@ -253,6 +267,17 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, t.toString());
             }
         });
+    }
+
+    private void processa_carregamento_dados_offline(ArrayList<Artigo> artigos){
+        artigos = bd.getAllHeadLineArticles();
+        adicionaRegistroTela(artigos);
+    }
+
+    private void adicionaRegistroTela(List<Artigo> artigos){
+        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
     }
 
     private void mostraAlerta(String titulo, String mensagem) {
@@ -267,9 +292,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void verifica_disponibilidade_aplicacao(){
         if (!verifica_conexao_mobile()){
-
-
-
             View view = getWindow().getDecorView().findViewById(android.R.id.content);
             Snackbar.make(view, "Sem internet, aplicação em modo offline! ", Snackbar.LENGTH_LONG).show();
         }
