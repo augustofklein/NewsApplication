@@ -5,4 +5,9 @@
     <string name="favoritos">Favoritos</string>
     <string name="buscar">Buscar</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancelar</string>
+    <string name="favorito_nao_adicionado">Favorito não adicionado!</string>
+    <string name="favorito_adicionado">Artigo adicionado aos Favoritos!</string>
+    <string name="favorito_editado">Favorito editado com sucesso!</string>
+    <string name="favorito_removido">Favorito Removido</string>
 </resources>

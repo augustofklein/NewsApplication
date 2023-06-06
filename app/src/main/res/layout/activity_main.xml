@@ -56,12 +56,11 @@
         android:id="@+id/rvHistorico"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/teal_700"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/bnvMenu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
 
     </androidx.recyclerview.widget.RecyclerView>
 
@@ -69,7 +68,6 @@
         android:id="@+id/rvFavoritos"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/teal_200"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/bnvMenu"
         app:layout_constraintEnd_toEndOf="parent"
@@ -82,7 +80,6 @@
         android:id="@+id/rvBuscar"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/purple_200"
         android:scrollbars="vertical"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/bnvMenu"

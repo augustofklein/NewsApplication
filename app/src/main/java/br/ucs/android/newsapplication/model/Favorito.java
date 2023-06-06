@@ -2,7 +2,6 @@ package br.ucs.android.newsapplication.model;
 
 import java.util.Date;
 
-import br.ucs.android.newsapplication.databinding.ItemFavoritosBinding;
 
 public class Favorito {
 

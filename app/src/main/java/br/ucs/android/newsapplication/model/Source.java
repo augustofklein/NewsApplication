@@ -27,7 +27,7 @@ public class Source {
 
     public void setId(String id) {
         if(id == null || id.equals("null"))
-            this.id = id ;
+            this.id = id;
         else
             this.id = "";
     }

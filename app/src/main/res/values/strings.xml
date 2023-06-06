@@ -6,4 +6,9 @@
     <string name="favoritos">Bookmarks</string>
     <string name="buscar">Search</string>
     <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="favorito_nao_adicionado">Operation canceled!</string>
+    <string name="favorito_adicionado">Article added to Bookmarks!</string>
+    <string name="favorito_editado">Article edited</string>
+    <string name="favorito_removido">Article removed from Bookmarks!</string>
 </resources>

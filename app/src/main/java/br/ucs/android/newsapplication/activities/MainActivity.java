@@ -3,7 +3,6 @@ package br.ucs.android.newsapplication.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,21 +22,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import br.ucs.android.newsapplication.BuscarFragment;
-import br.ucs.android.newsapplication.FavoritosFragment;
 import br.ucs.android.newsapplication.R;
 import br.ucs.android.newsapplication.adapter.FavoritoAdapter;
 import br.ucs.android.newsapplication.adapter.HistoricoAdapter;
-import br.ucs.android.newsapplication.adapter.NewsAdapter;
+import br.ucs.android.newsapplication.adapter.ArtigoAdapter;
 import br.ucs.android.newsapplication.database.BDSQLiteHelper;
 import br.ucs.android.newsapplication.model.Artigo;
 import br.ucs.android.newsapplication.model.Favorito;
@@ -101,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (item.getItemId()) {
                     case R.id.nav_historico:
-                        verifica_disponibilidade_aplicacao();
                         listaHistorico.setVisibility(View.VISIBLE);
                         listaFavoritos.setVisibility(View.GONE);
                         listaInicial.setVisibility(View.GONE);
@@ -111,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case R.id.nav_favoritos:
-                        verifica_disponibilidade_aplicacao();
                         listaFavoritos.setVisibility(View.VISIBLE);
                         listaBuscar.setVisibility(View.GONE);
                         listaHistorico.setVisibility(View.GONE);
@@ -131,11 +124,14 @@ public class MainActivity extends AppCompatActivity {
 
                     case R.id.nav_buscar:
                         verifica_disponibilidade_aplicacao();
-                        listaBuscar.setVisibility(View.VISIBLE);
-                        camposBusca.setVisibility(View.VISIBLE);
-                        listaFavoritos.setVisibility(View.GONE);
-                        listaHistorico.setVisibility(View.GONE);
-                        listaInicial.setVisibility(View.GONE);
+                        if(verifica_conexao_mobile()) {
+                            listaBuscar.setVisibility(View.VISIBLE);
+                            camposBusca.setVisibility(View.VISIBLE);
+                            listaFavoritos.setVisibility(View.GONE);
+                            listaHistorico.setVisibility(View.GONE);
+                            listaInicial.setVisibility(View.GONE);
+                        }
+                        else return false;
 
                 }
 
@@ -149,30 +145,36 @@ public class MainActivity extends AppCompatActivity {
         listaBuscar.setVisibility(View.GONE);
         camposBusca.setVisibility(View.GONE);
 
+
+        listaInicial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.getId();
+            }
+        });
     }
 
     public void onClickSelecao(View v){
 
-        WebView myWebView;
-
-        myWebView = (WebView) findViewById(R.id.webView);
+        WebView myWebView = (WebView) findViewById(R.id.wvArtigo);
 
         WebViewClientImpl webViewClient = new WebViewClientImpl(this);
 
         myWebView.setWebViewClient(webViewClient);
-        //myWebView.setWebViewClient(new WebViewClient());
 
         myWebView.loadUrl("https://ava.ucs.br");
-        //myWebView.loadUrl("file:///android_asset/html/index.html");
 
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+
+        myWebView.setVisibility(View.VISIBLE);
 
     }
 
     private void inicializa_bd_local(){
         bd = new BDSQLiteHelper(this);
     }
+
 
     private void atualiza_headlines_bd_local(){
         if(verifica_conexao_mobile()){
@@ -184,9 +186,10 @@ public class MainActivity extends AppCompatActivity {
     private void atualiza_historico_bd_local(){
         List<Historico> historico = bd.getAllHistorico();
         listaHistorico.setLayoutManager(new LinearLayoutManager(this));
-        listaHistorico.setAdapter(new HistoricoAdapter(historico, R.layout.item_historico, this));
+        listaHistorico.setAdapter(new HistoricoAdapter(historico, R.layout.item_historico, this, bd));
     }
-    private void grava_headlines_bd_local(){
+
+    private void grava_headlines_bd_local() {
         Call<NewsResponse> call;
 
         call = retorna_dados_endpoint_headlines();
@@ -197,15 +200,11 @@ public class MainActivity extends AppCompatActivity {
                 int statusCode = response.code();
                 List<Artigo> artigos = response.body().getResults();
 
-                for(int i = 0; i<artigos.size(); i++){
+                for (int i = 0; i < artigos.size(); i++) {
                     bd.addArtigo(artigos.get(i), 1);
                 }
             }
 
-    private void atualiza_favoritos_bd_local(){
-        List<Favorito> favoritos = bd.getAllFavoritos();
-        listaFavoritos.setLayoutManager(new LinearLayoutManager(this));
-        listaFavoritos.setAdapter(new FavoritoAdapter(favoritos, R.layout.item_favoritos, this));
             @Override
             public void onFailure(Call<NewsResponse> call, Throwable t) {
                 mostraAlerta("Erro", t.toString());
@@ -215,10 +214,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void atualiza_favoritos_bd_local(){
+        List<Favorito> favoritos = bd.getAllFavoritos();
+        listaFavoritos.setLayoutManager(new LinearLayoutManager(this));
+        listaFavoritos.setAdapter(new FavoritoAdapter(favoritos, R.layout.item_favoritos, this, bd));
+
+    }
+
     public void processa_carregamento_headlines(){
 
         if(verifica_conexao_mobile()){
-            processa_carregamento_dados_online(retorna_dados_endpoint_headlines());
+            processa_carregamento_dados_online(retorna_dados_endpoint_headlines(), R.id.rvInicial);
         } else {
             processa_carregamento_dados_offline(retorna_dados_headlines_bd());
         }
@@ -244,20 +250,28 @@ public class MainActivity extends AppCompatActivity {
         cal.add(Calendar.DATE, -1);
         String dataFormatada = dateFormat.format(cal.getTime());
 
-        if(verifica_conexao_mobile()) {
-            ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
+        ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
+        Call<NewsResponse> call = apiService.getSearchByUser(pesquisa, dataFormatada, API_KEY);
 
-        processa_carregamento_dados_online(call);
+        processa_carregamento_dados_online(call, R.id.rvBuscar);
     }
 
-    public void processa_carregamento_dados_online(Call<NewsResponse> call){
+    public void processa_carregamento_dados_online(Call<NewsResponse> call, int idLayout){
         call.enqueue(new Callback<NewsResponse>() {
             @Override
             public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
                 int statusCode = response.code();
                 List<Artigo> artigos = response.body().getResults();
-                adicionaRegistroTela(artigos);
+                adicionaRegistroTela(artigos, idLayout);
+
+                if(idLayout == R.id.rvBuscar)
+                {
+                    Historico historico = new Historico();
+                    historico.setData(new Date());
+                    historico.setTermo(campoBusca.getText().toString());
+                    historico.setQuantidade(artigos.size());
+                    bd.addHistorico(historico);
+                }
             }
 
             @Override
@@ -271,18 +285,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void processa_carregamento_dados_offline(ArrayList<Artigo> artigos){
         artigos = bd.getAllHeadLineArticles();
-        adicionaRegistroTela(artigos);
+        adicionaRegistroTela(artigos, R.id.rvInicial);
     }
 
-    private void adicionaRegistroTela(List<Artigo> artigos){
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.articles_recycler_view);
+    private void adicionaRegistroTela(List<Artigo> artigos, int idLayout){
+        final RecyclerView recyclerView = (RecyclerView) findViewById(idLayout);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(new NewsAdapter(artigos, R.layout.item_registro, getApplicationContext()));
+        recyclerView.setAdapter(new ArtigoAdapter(artigos, R.layout.item_registro, getApplicationContext(), bd));
     }
 
     private void mostraAlerta(String titulo, String mensagem) {
-        AlertDialog alertDialog = new
-                AlertDialog.Builder(MainActivity.this).create();
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
         alertDialog.setTitle(titulo);
         alertDialog.setMessage(mensagem);
         alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.ok),

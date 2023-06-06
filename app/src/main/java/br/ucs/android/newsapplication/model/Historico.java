@@ -11,8 +11,6 @@ public class Historico {
 
     private Date data;
 
-    private ArrayList<Artigo> resultados;
-
     private int quantidade;
 
 
@@ -38,14 +36,6 @@ public class Historico {
 
     public void setData(Date data) {
         this.data = data;
-    }
-
-    public ArrayList<Artigo> getResultados() {
-        return resultados;
-    }
-
-    public void setResultados(ArrayList<Artigo> resultados) {
-        this.resultados = resultados;
     }
 
     public int getQuantidade() {
